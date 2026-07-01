@@ -1,0 +1,84 @@
+// 검색앱 Prisma 스키마.
+// 원칙: 본 앱이 소유/마이그레이션하는 것은 `search` 스키마뿐.
+// 외부 스키마(susi/jungsi 전형)는 여기 모델로 두지 않고, sync 모듈에서 $queryRaw 읽기 전용으로 접근.
+// (마이그레이션이 외부 스키마를 건드리지 않도록 의도적으로 분리 — docs/데이터연동-multiSchema-계획.md §3.2 패턴 A)
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL") // ?schema=search 로 search 스키마에 생성
+  extensions = [vector]            // pgvector
+}
+
+/// 정규화된 통합 전형 (grain = 대학·모집단위·전형·연도)
+model SrchAdmission {
+  id                Int      @id @default(autoincrement())
+  trackType         String   @map("track_type") // SUSI | JEONGSI
+  curriculum        String   @default("Y2015") // Y2015 | Y2022
+  year              Int
+
+  universityName    String   @map("university_name")
+  region            String?
+  establishmentType String?  @map("establishment_type")
+  departmentName    String   @map("department_name") // 모집단위
+  fieldGeneral      String?  @map("field_general")
+  fieldMajor        String?  @map("field_major")
+  fieldMid          String?  @map("field_mid")
+  fieldMinor        String?  @map("field_minor")
+
+  admissionType     String   @map("admission_type")
+  admissionName     String   @map("admission_name")
+  recruitmentNumber Int?     @map("recruitment_number")
+
+  ratios            Json?    // {수능,교과,서류,면접,실기 비율}
+  csatRequired      String?  @map("csat_required")
+  minGradeDesc      String?  @map("min_grade_desc")
+  hasInterview      Boolean  @default(false) @map("has_interview")
+  prevResults       Json?    @map("prev_results") // 연도별 입결/경쟁률
+  riskBand          Json?    @map("risk_band")
+
+  descriptionText   String   @map("description_text") // 검색/임베딩용 통합 텍스트
+
+  sourceApp         String   @map("source_app")        // susi | jungsi
+  sourceId          String   @map("source_id")
+  sourceUpdatedAt   DateTime? @map("source_updated_at")
+  syncedAt          DateTime @default(now()) @map("synced_at")
+
+  embedding         SrchEmbedding?
+
+  @@unique([sourceApp, sourceId], name: "uq_source")
+  @@index([trackType, curriculum, year])
+  @@index([region])
+  @@map("srch_admission")
+}
+
+/// 임베딩 벡터 (text-embedding-004 = 768차원, 모델 변경 시 차원 조정)
+model SrchEmbedding {
+  admissionId Int                          @id @map("admission_id")
+  embedding   Unsupported("vector(768)")?
+  model       String
+  updatedAt   DateTime                     @default(now()) @map("updated_at")
+
+  admission   SrchAdmission @relation(fields: [admissionId], references: [id], onDelete: Cascade)
+
+  @@map("srch_embedding")
+}
+
+/// 동기화 이력
+model SrchSyncLog {
+  id           Int       @id @default(autoincrement())
+  sourceApp    String    @map("source_app")
+  mode         String    // full | incremental
+  startedAt    DateTime  @default(now()) @map("started_at")
+  finishedAt   DateTime? @map("finished_at")
+  rowsRead     Int       @default(0) @map("rows_read")
+  rowsUpserted Int       @default(0) @map("rows_upserted")
+  status       String    @default("running") // running | success | failed
+  error        String?
+
+  @@map("srch_sync_log")
+}

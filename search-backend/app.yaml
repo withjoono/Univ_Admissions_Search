@@ -1,0 +1,19 @@
+# Google App Engine — service: search-backend (project ts-back-nest-479305)
+runtime: nodejs20
+service: search-backend
+instance_class: F2
+
+entrypoint: node dist/main.js
+
+env_variables:
+  NODE_ENV: 'production'
+  PORT: '8080'
+  # 실제 비밀값은 Secret Manager / 배포 시 주입 (여기에 평문 금지)
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 2
+
+# Cloud SQL 연결 (소켓)
+beta_settings:
+  cloud_sql_instances: ts-back-nest-479305:asia-northeast3:geobuk-db

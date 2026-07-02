@@ -1,5 +1,5 @@
 # Google App Engine — service: search-backend (project ts-back-nest-479305)
-runtime: nodejs20
+runtime: nodejs22
 service: search-backend
 instance_class: F2
 

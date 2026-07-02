@@ -35,3 +35,4 @@ yarn-error.log*
 
 # vite
 search-frontend/.vite/
+app.deploy.yaml

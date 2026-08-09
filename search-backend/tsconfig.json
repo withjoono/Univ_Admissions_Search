@@ -9,6 +9,7 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -23,5 +24,7 @@
       "src/*": ["src/*"]
     }
   },
-  "exclude": ["node_modules", "dist"]
+  // scripts/ 는 ts-node로 직접 실행하는 일회성 적재 도구다. 빌드에 포함되면 rootDir이
+  // src/ 상위로 올라가 산출물이 dist/src/main.js 가 되고, App Engine entrypoint(node dist/main.js)가 깨진다.
+  "exclude": ["node_modules", "dist", "scripts"]
 }

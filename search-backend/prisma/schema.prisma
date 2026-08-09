@@ -82,3 +82,69 @@ model SrchSyncLog {
 
   @@map("srch_sync_log")
 }
+
+// =====================================================================
+// 진학지도 자료(특별전형 목록 + 서술형 해설) — PDF 자료집 적재분
+// scripts/guide/* 파이프라인이 채운다. susi/jungsi 라이브 전형과 별개 출처.
+// =====================================================================
+
+/// 특별전형·예체능(비실기) 목록형 데이터 (정형 표 → 필터 검색용)
+/// grain = 자료 한 행(대학·모집단위·전형). PDF 표에서 추출.
+model SrchGuideAdmission {
+  id                Int      @id @default(autoincrement())
+  year              Int      @default(2027)
+  category          String   // 농어촌학생 | 지역인재 | 특성화고졸업자 | 예체능-미술계열(비실기) ...
+
+  region            String?  // 지역/권역 (병합셀 forward-fill 반영)
+  universityName    String   @map("university_name")
+  departmentName    String?  @map("department_name") // 모집단위(있을 때)
+  admissionType     String?  @map("admission_type")  // 교과 | 종합 | 논술 ...
+  admissionName     String?  @map("admission_name")
+
+  recruitmentText   String?  @map("recruitment_text")   // 원문 그대로("(36)" 등 미확정 표기 보존)
+  recruitmentNumber Int?     @map("recruitment_number") // 파싱 가능하면 숫자
+  method            String?  // 전형방법(예: 학생부100)
+  csatMinDesc       String?  @map("csat_min_desc")      // 수능최저학력기준(있을 때)
+  note              String?  // 비고
+
+  searchText        String   @map("search_text")        // 평탄화 검색/임베딩 텍스트
+  raw               Json                                 // 원본 추출 행 보존
+  sourceFile        String   @map("source_file")
+  sourcePage        Int      @map("source_page")
+  syncedAt          DateTime @default(now()) @map("synced_at")
+
+  @@index([category, year])
+  @@index([region])
+  @@index([universityName])
+  @@map("srch_guide_admission")
+}
+
+/// 서술형 자료 청크 (계열별 분석·상담 자료집·지역의사 안내 등) — RAG 근거
+model SrchKnowledgeChunk {
+  id         Int      @id @default(autoincrement())
+  year       Int      @default(2027)
+  doc        String   // 계열별분석 | 상담자료집 | 지역의사안내
+  title      String
+  page       Int
+  text       String                                       // 근거로 인용될 원문 청크
+
+  sourceFile String?  @map("source_file")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  embedding  SrchKnowledgeEmbedding?
+
+  @@index([doc, year])
+  @@map("srch_knowledge_chunk")
+}
+
+/// 청크 임베딩 벡터 (gemini-embedding-001, outputDimensionality=768 → 기존 SrchEmbedding과 차원 통일)
+model SrchKnowledgeEmbedding {
+  chunkId   Int                          @id @map("chunk_id")
+  embedding Unsupported("vector(768)")?
+  model     String
+  updatedAt DateTime                     @default(now()) @map("updated_at")
+
+  chunk     SrchKnowledgeChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@map("srch_knowledge_embedding")
+}

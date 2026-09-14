@@ -6,7 +6,7 @@ export function AppHeader() {
     <a className="skip-link" href="#main-content">본문으로 건너뛰기</a>
     <header className="app-header">
       <div className="header-inner">
-        <Link to="/" className="app-brand" aria-label="T검색 홈"><img src="/logo.png" alt="" width={38} height={38} /><span>T검색<small>by T스쿨</small></span></Link>
+        <Link to="/" className="app-brand" aria-label="T검색 홈"><img src="https://www.tskool.kr/logo.png" alt="티스쿨 로고" width={38} height={38} /><span>T검색<small>by T스쿨</small></span></Link>
         <nav className="app-nav" aria-label="주 메뉴">
           <Link to="/" activeOptions={{ exact: true }} activeProps={{ className: 'active', 'aria-current': 'page' }}>전형 검색</Link>
           <Link to="/promo" activeOptions={{ exact: true }} activeProps={{ className: 'active', 'aria-current': 'page' }}>서비스 소개</Link>

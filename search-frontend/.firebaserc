@@ -5,7 +5,9 @@
   "targets": {
     "ts-front-479305": {
       "hosting": {
-        "search-front": ["search-front"]
+        "search-front": [
+          "search-front"
+        ]
       }
     }
   }

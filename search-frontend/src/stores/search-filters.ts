@@ -6,7 +6,7 @@ interface SearchFiltersState extends SearchParams {
   reset: () => void;
 }
 
-const initial: SearchParams = { q: '', page: 1, pageSize: 20, sort: undefined };
+const initial: SearchParams = { q: '', trackType: undefined, curriculum: undefined, region: undefined, field: undefined, page: 1, pageSize: 20, sort: undefined };
 
 export const useSearchFilters = create<SearchFiltersState>((set) => ({
   ...initial,

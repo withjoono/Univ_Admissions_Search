@@ -7,7 +7,7 @@ import { camelizeKeys, decamelizeKeys } from 'humps';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? '/api' : 'https://search-backend-dot-ts-back-nest-479305.du.r.appspot.com/api');
-export const publicClient = axios.create({ baseURL: API_BASE_URL });
+export const publicClient = axios.create({ baseURL: API_BASE_URL, timeout: 12000 });
 
 publicClient.interceptors.request.use((config) => {
   if (config.params) config.params = decamelizeKeys(config.params);

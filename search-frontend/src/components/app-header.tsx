@@ -12,7 +12,7 @@ export function AppHeader() {
           <Link to="/promo" activeOptions={{ exact: true }} activeProps={{ className: 'active', 'aria-current': 'page' }}>서비스 소개</Link>
           <Link to="/promo/guide" activeProps={{ className: 'active', 'aria-current': 'page' }}>이용 가이드</Link>
         </nav>
-        <a className="hub-link" href="https://www.tskool.kr"><Icon name="grid" size={17} /><span>T스쿨 바로가기</span><Icon name="arrow" size={16} /></a>
+        <a className="hub-link" href="https://www.tskool.kr/auth/login"><Icon name="grid" size={17} /><span>내 계정 · 로그인</span><Icon name="arrow" size={16} /></a>
       </div>
     </header>
   </>;
